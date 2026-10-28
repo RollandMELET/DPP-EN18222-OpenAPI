@@ -1,0 +1,47 @@
+{
+    "linkset": [
+        {
+            "anchor": "https://soprema.dpp.360sc.yt/01/03434550314367/10/US03-048838",
+            "https://ref.gs1.org/voc/dpp": [
+                {
+                    "href": "https://soprema.dpp.360sc.yt/01/03434550314367/10/US03-048838/dpp.jsonld",
+                    "type": "application/ld+json"
+                }
+            ],
+            "https://ref.gs1.org/voc/defaultLink": [
+                {
+                    "href": "https://soprema.dpp.360sc.yt/01/03434550314367/10/US03-048838",
+                    "title": "Digital product passport"
+                }
+            ],
+            "https://ref.gs1.org/voc/pip": [
+                {
+                    "href": "https://soprema.dpp.360sc.yt/01/03434550314367/10/US03-048838",
+                    "title": "Digital product passport (web page)",
+                    "type": "text/html",
+                    "hreflang": [
+                        "fr",
+                        "en"
+                    ]
+                }
+            ],
+            "https://ref.gs1.org/voc/certificationInfo": [
+                {
+                    "href": "https://soprema.dpp.360sc.yt/assets/docs/DOP-STYRBASE-STICK.pdf",
+                    "title": "Declaration of performance (DoP)",
+                    "type": "application/pdf",
+                    "hreflang": [
+                        "fr"
+                    ]
+                }
+            ],
+            "up": [
+                {
+                    "href": "https://soprema.dpp.360sc.yt/01/03434550314367",
+                    "title": "Digital product passport of the product type",
+                    "type": "text/html"
+                }
+            ]
+        }
+    ]
+}

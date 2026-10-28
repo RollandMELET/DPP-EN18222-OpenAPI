@@ -1,0 +1,32 @@
+{
+    "linkset": [
+        {
+            "anchor": "https://soprema.dpp.360sc.yt/.well-known/api-catalog",
+            "item": [
+                {
+                    "href": "https://soprema.dpp.360sc.yt/api/"
+                }
+            ]
+        },
+        {
+            "anchor": "https://soprema.dpp.360sc.yt/api/",
+            "service-desc": [
+                {
+                    "href": "https://soprema.dpp.360sc.yt/api/openapi.yaml",
+                    "type": "application/vnd.oai.openapi;version=3.1"
+                }
+            ],
+            "service-doc": [
+                {
+                    "href": "https://soprema.dpp.360sc.yt/api/docs",
+                    "type": "text/html"
+                }
+            ],
+            "profile": [
+                {
+                    "href": "tag:rorworld.eu,2026:en18222:1"
+                }
+            ]
+        }
+    ]
+}

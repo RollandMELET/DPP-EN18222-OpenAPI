@@ -1,0 +1,496 @@
+openapi: 3.1.0
+info:
+  title: EN 18222 DPP Life Cycle API (community, unofficial)
+  version: 0.1.0
+  summary: Unofficial community OpenAPI 3.1 description of the methods of EN 18222:2026.
+  description: |
+    Unofficial, community proposal. Not endorsed by CEN, CENELEC or CEN/CLC/JTC 24.
+
+    This file describes, as one concrete REST/HTTPS realisation, the methods of
+    EN 18222:2026 (Digital Product Passport - Application Programming Interfaces
+    (APIs) for the product passport lifecycle management and searchability).
+    It does not reproduce the text of the standard. Read the standard itself for
+    the normative definition of each method, parameter and status code.
+
+    Related standards, cited by number and title only:
+    * EN 18219:2026 (Digital product passport - Unique identifiers): `productId`
+      and `dppId` are unique identifiers in its sense.
+    * EN 18223:2026 (Digital Product Passport - System interoperability): the
+      passport payload returned by the read methods.
+    * EN 18216:2026 (Digital product passport - Data exchange protocols):
+      transport and error handling.
+    * EN 18239:2026 (Digital Product Passport - Access rights management,
+      information system security, and business confidentiality): access control.
+      It fixes no authentication protocol, so `securitySchemes` below is a
+      placeholder each operator replaces with its own.
+
+    Identifiers in paths: `dppId` and `productId` are URIs (for example a GS1
+    Digital Link URI). They are percent-encoded into ONE path segment
+    (RFC 3986 section 2.1), e.g.
+    `https://id.example.org/01/09520123456788/10/LOT42` becomes
+    `https%3A%2F%2Fid.example.org%2F01%2F09520123456788%2F10%2FLOT42`.
+
+    Each operation carries `x-en18222-method`, the method name it realises, so
+    that a client can map operations to the standard. Method names follow the
+    public, Apache-2.0 work of OwnYourData (see README) and are to be checked
+    against the published standard before version 1.0.0 of this file.
+
+    Discovery (how a client finds the API root from a data carrier) is out of
+    scope of EN 18222. A proposal based on RFC 9727 (api-catalog) and RFC 6906
+    (profile) is in `discovery/DISCOVERY.md`.
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+  contact:
+    name: Rolland Mélet, RoRworld
+servers:
+  - url: https://{host}{basePath}
+    description: API root of a DPP service. EN 18222 fixes relative paths, not the root.
+    variables:
+      host:
+        default: api.example.org
+      basePath:
+        default: ''
+tags:
+  - name: lifecycle
+    description: Create, update and delete a passport.
+  - name: read
+    description: Read a passport by identifier, product or date.
+  - name: elements
+    description: Read and update parts of a passport.
+  - name: registry
+    description: Registration of a passport in a registry.
+security:
+  - operatorAuth: []
+paths:
+  /v1/dpps:
+    post:
+      tags: [lifecycle]
+      operationId: createDPP
+      x-en18222-method: CreateDPP
+      description: Realises the EN 18222:2026 method `CreateDPP`. See the standard for its normative definition.
+      summary: Create a passport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DigitalProductPassport'
+      responses:
+        '201':
+          description: Passport created.
+          headers:
+            Location:
+              description: URI of the created passport.
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitalProductPassport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /v1/dpps/{dppId}:
+    parameters:
+      - $ref: '#/components/parameters/dppId'
+    get:
+      tags: [read]
+      operationId: readDPPById
+      x-en18222-method: ReadDPPById
+      description: Realises the EN 18222:2026 method `ReadDPPById`. See the standard for its normative definition.
+      summary: Read a passport by its identifier
+      security:
+        - {}
+        - operatorAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Passport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [lifecycle]
+      operationId: updateDPPById
+      x-en18222-method: UpdateDPPById
+      description: Realises the EN 18222:2026 method `UpdateDPPById`. See the standard for its normative definition.
+      summary: Update a passport
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/DigitalProductPassport'
+      responses:
+        '200':
+          $ref: '#/components/responses/Passport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [lifecycle]
+      operationId: deleteDPPById
+      x-en18222-method: DeleteDPPById
+      description: Realises the EN 18222:2026 method `DeleteDPPById`. See the standard for its normative definition.
+      summary: Delete a passport
+      responses:
+        '204':
+          description: Passport deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/dppsByProductId/{productId}:
+    parameters:
+      - $ref: '#/components/parameters/productId'
+    get:
+      tags: [read]
+      operationId: readDPPByProductId
+      x-en18222-method: ReadDPPByProductId
+      description: Realises the EN 18222:2026 method `ReadDPPByProductId`. See the standard for its normative definition.
+      summary: Read the passport of a product
+      security:
+        - {}
+        - operatorAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Passport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/dppsByProductIds:
+    post:
+      tags: [read]
+      operationId: readDPPIdsByProductIds
+      x-en18222-method: ReadDPPIdsByProductIds
+      description: Realises the EN 18222:2026 method `ReadDPPIdsByProductIds`. See the standard for its normative definition.
+      summary: Find passport identifiers for a list of products
+      security:
+        - {}
+        - operatorAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productIds]
+              properties:
+                productIds:
+                  type: array
+                  minItems: 1
+                  items:
+                    $ref: '#/components/schemas/UniqueIdentifier'
+      responses:
+        '200':
+          description: One entry per requested product identifier.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [results]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required: [productId]
+                      properties:
+                        productId:
+                          $ref: '#/components/schemas/UniqueIdentifier'
+                        dppIds:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/UniqueIdentifier'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /v1/dppsByIdAndDate/{dppId}:
+    parameters:
+      - $ref: '#/components/parameters/dppId'
+    get:
+      tags: [read]
+      operationId: readDPPVersionByIdAndDate
+      x-en18222-method: ReadDPPVersionByIdAndDate
+      description: Realises the EN 18222:2026 method `ReadDPPVersionByIdAndDate`. See the standard for its normative definition.
+      summary: Read the version of a passport valid at a given date
+      security:
+        - {}
+        - operatorAuth: []
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: Date and time (RFC 3339) at which the version was valid.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          $ref: '#/components/responses/Passport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/dpps/{dppId}/collections/{elementId}:
+    parameters:
+      - $ref: '#/components/parameters/dppId'
+      - name: elementId
+        in: path
+        required: true
+        description: Identifier of a data element collection of the passport.
+        schema:
+          type: string
+    get:
+      tags: [elements]
+      operationId: readDataElementCollection
+      x-en18222-method: ReadDataElementCollection
+      description: Realises the EN 18222:2026 method `ReadDataElementCollection`. See the standard for its normative definition.
+      summary: Read a data element collection
+      security:
+        - {}
+        - operatorAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Fragment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [elements]
+      operationId: updateDataElementCollection
+      x-en18222-method: UpdateDataElementCollection
+      description: Realises the EN 18222:2026 method `UpdateDataElementCollection`. See the standard for its normative definition.
+      summary: Update a data element collection
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/Fragment'
+      responses:
+        '200':
+          $ref: '#/components/responses/Fragment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/dpps/{dppId}/elements/{elementPath}:
+    parameters:
+      - $ref: '#/components/parameters/dppId'
+      - name: elementPath
+        in: path
+        required: true
+        description: |
+          JSONPath (RFC 9535) expression selecting one data element of the
+          passport, percent-encoded into one path segment, e.g. `%24.manufacturer`.
+        schema:
+          type: string
+    get:
+      tags: [elements]
+      operationId: readDataElement
+      x-en18222-method: ReadDataElement
+      description: Realises the EN 18222:2026 method `ReadDataElement`. See the standard for its normative definition.
+      summary: Read one data element
+      security:
+        - {}
+        - operatorAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Fragment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [elements]
+      operationId: updateDataElement
+      x-en18222-method: UpdateDataElement
+      description: Realises the EN 18222:2026 method `UpdateDataElement`. See the standard for its normative definition.
+      summary: Update one data element
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Fragment'
+      responses:
+        '200':
+          $ref: '#/components/responses/Fragment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/registerDPP:
+    post:
+      tags: [registry]
+      operationId: registerProductDPP
+      x-en18222-method: RegisterProductDPP
+      description: Realises the EN 18222:2026 method `RegisterProductDPP`. See the standard for its normative definition.
+      summary: Register a passport in a registry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+      responses:
+        '201':
+          description: Registration accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registration'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+components:
+  securitySchemes:
+    operatorAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Placeholder. EN 18239:2026 fixes no authentication protocol; each
+        operator declares its own scheme here (OAuth 2.0, mTLS, ...).
+  parameters:
+    dppId:
+      name: dppId
+      in: path
+      required: true
+      description: Unique identifier of the passport (EN 18219:2026), percent-encoded into one path segment.
+      schema:
+        type: string
+      example: https%3A%2F%2Fid.example.org%2Fdpp%2F42
+    productId:
+      name: productId
+      in: path
+      required: true
+      description: Unique product identifier (EN 18219:2026), percent-encoded into one path segment.
+      schema:
+        type: string
+      example: https%3A%2F%2Fid.example.org%2F01%2F09520123456788%2F10%2FLOT42
+  schemas:
+    UniqueIdentifier:
+      type: string
+      format: uri
+      description: Unique identifier in the sense of EN 18219:2026, in its non-encoded form.
+    DigitalProductPassport:
+      type: object
+      description: |
+        Passport payload. Its structure (header and content) is defined by
+        EN 18223:2026 and is not restated here. Kept open on purpose.
+      additionalProperties: true
+      externalDocs:
+        description: EN 18223:2026 (Digital Product Passport - System interoperability)
+        url: https://standards.cencenelec.eu/
+    Fragment:
+      description: A data element or collection of a passport, as structured by EN 18223:2026.
+      oneOf:
+        - type: object
+          additionalProperties: true
+        - type: array
+          items: {}
+        - type: string
+        - type: number
+        - type: boolean
+    Registration:
+      type: object
+      required: [dppId, productId]
+      properties:
+        dppId:
+          $ref: '#/components/schemas/UniqueIdentifier'
+        productId:
+          $ref: '#/components/schemas/UniqueIdentifier'
+        dppApiEndpoint:
+          type: string
+          format: uri
+          description: Root of the API serving the passport.
+      additionalProperties: true
+    Problem:
+      type: object
+      description: Error body (RFC 9457, Problem Details for HTTP APIs).
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+  responses:
+    Passport:
+      description: The passport.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DigitalProductPassport'
+        application/ld+json:
+          schema:
+            $ref: '#/components/schemas/DigitalProductPassport'
+    Fragment:
+      description: The requested part of the passport.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fragment'
+    BadRequest:
+      description: Malformed request or identifier.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: Authentication required.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: Access right missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No passport or element for this identifier.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: A passport already exists for this identifier.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
